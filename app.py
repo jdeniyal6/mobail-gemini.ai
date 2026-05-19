@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # GEMINI API KEY
-API_KEY = "YAHAN_APNI_GEMINI_API_KEY_DALO"
+API_KEY = "AIzaSyDyC5no-nBZlPpzqNSSmg1axyB7eUHtunE"
 
 @app.route("/")
 def home():
