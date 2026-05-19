@@ -1,180 +1,42 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gemini Mobile AI</title>
-
-<style>
-body{
-background:#081226;
-font-family:Arial;
-color:white;
-padding:15px;
-}
-
-h1{
-color:#35b7ff;
-}
-
-#chat{
-height:60vh;
-overflow:auto;
-margin-bottom:10px;
-}
-
-.msg{
-padding:12px;
-border-radius:12px;
-margin:8px 0;
-}
-
-.user{
-background:#35b7ff;
-color:black;
-}
-
-.bot{
-background:#1b2742;
-}
-
-input{
-width:100%;
-padding:14px;
-border:none;
-border-radius:12px;
-font-size:16px;
-}
-
-button{
-width:100%;
-padding:14px;
-margin-top:10px;
-border:none;
-border-radius:12px;
-background:#35b7ff;
-font-size:18px;
-font-weight:bold;
-}
-
-img{
-max-width:180px;
-border-radius:10px;
-margin-top:10px;
-}
-</style>
-</head>
-
-<body>
-
-<h1>Gemini Mobile AI</h1>
-
-<div id="chat"></div>
-
-<input id="prompt" placeholder="Ask anything">
-
-<button onclick="sendMessage()">Send</button>
-
-<button onclick="startVoice()">🎤 Voice</button>
-
-<input type="file" id="imageInput" accept="image/*">
-
 <script>
+async function sendMessage() {
 
-const chat=document.getElementById("chat");
+    let input = document.getElementById("userInput");
+    let message = input.value;
 
-function addMessage(text,type){
+    if(message.trim() === "") return;
 
-const div=document.createElement("div");
+    let chatBox = document.getElementById("chatBox");
 
-div.className="msg "+type;
+    chatBox.innerHTML += `
+    <div class="user">${message}</div>
+    `;
 
-div.innerHTML=text;
+    input.value = "";
 
-chat.appendChild(div);
+    try {
 
-chat.scrollTop=chat.scrollHeight;
+        let response = await fetch("/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message
+            })
+        });
+
+        let data = await response.json();
+
+        chatBox.innerHTML += `
+        <div class="bot">${data.reply}</div>
+        `;
+
+    } catch (error) {
+
+        chatBox.innerHTML += `
+        <div class="bot">Backend error</div>
+        `;
+    }
 }
-
-async function sendMessage(){
-
-const input=document.getElementById("prompt");
-
-const text=input.value;
-
-if(!text) return;
-
-addMessage(text,"user");
-
-input.value="";
-
-try{
-
-const res=await fetch("https://YOUR-RENDER-URL.onrender.com/chat",{
-
-method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-message:text
-})
-
-});
-
-const data=await res.json();
-
-addMessage(data.reply,"bot");
-
-}catch(e){
-
-addMessage("Backend error","bot");
-
-}
-
-}
-
-function startVoice(){
-
-const recognition=new webkitSpeechRecognition();
-
-recognition.lang="en-US";
-
-recognition.onresult=function(event){
-
-document.getElementById("prompt").value=
-event.results[0][0].transcript;
-
-};
-
-recognition.start();
-
-}
-
-document.getElementById("imageInput")
-.addEventListener("change",function(e){
-
-const file=e.target.files[0];
-
-if(!file) return;
-
-const reader=new FileReader();
-
-reader.onload=function(){
-
-addMessage(
-'<img src="'+reader.result+'">',
-"user"
-);
-
-};
-
-reader.readAsDataURL(file);
-
-});
-
-</script>
-
-</body>
-</html>
+          </script>
