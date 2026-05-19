@@ -13,16 +13,19 @@ def home():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    data = request.json
+    data = request.get_json()
+
     user_message = data.get("message", "")
 
     if user_message.lower() == "hi":
-        bot_reply = "Hello 👋"
+        reply = "Hello 👋"
+    elif user_message.lower() == "how are you":
+        reply = "I am fine 🚀"
     else:
-        bot_reply = f"You said: {user_message}"
+        reply = f"You said: {user_message}"
 
     return jsonify({
-        "reply": bot_reply
+        "reply": reply
     })
 
 if __name__ == "__main__":
