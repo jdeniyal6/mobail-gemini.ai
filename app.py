@@ -4,27 +4,25 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
+@app.route("/")
+def home():
+    return jsonify({
+        "status": "online",
+        "message": "Gemini Mobile AI Backend Running"
+    })
+
 @app.route("/chat", methods=["POST"])
 def chat():
-
     data = request.json
+    user_message = data.get("message", "")
 
-    msg = data.get("message","").lower()
-
-    if "hello" in msg:
-        reply = "Hello 👋"
-
-    elif "your name" in msg:
-        reply = "I am Gemini Mobile AI"
-
-    elif "how are you" in msg:
-        reply = "I am fine 🚀"
-
+    if user_message.lower() == "hi":
+        bot_reply = "Hello 👋"
     else:
-        reply = "You said: " + msg
+        bot_reply = f"You said: {user_message}"
 
     return jsonify({
-        "reply": reply
+        "reply": bot_reply
     })
 
 if __name__ == "__main__":
