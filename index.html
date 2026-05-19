@@ -1,42 +1,176 @@
-<script>
-async function sendMessage() {
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gemini Mobile AI</title>
 
-    let input = document.getElementById("userInput");
-    let message = input.value;
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    if(message.trim() === "") return;
+<style>
 
-    let chatBox = document.getElementById("chatBox");
-
-    chatBox.innerHTML += `
-    <div class="user">${message}</div>
-    `;
-
-    input.value = "";
-
-    try {
-
-        let response = await fetch("/chat", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                message: message
-            })
-        });
-
-        let data = await response.json();
-
-        chatBox.innerHTML += `
-        <div class="bot">${data.reply}</div>
-        `;
-
-    } catch (error) {
-
-        chatBox.innerHTML += `
-        <div class="bot">Backend error</div>
-        `;
-    }
+body{
+background:#020d2b;
+font-family:Arial;
+margin:0;
+padding:0;
+color:white;
 }
-          </script>
+
+h1{
+text-align:center;
+padding:20px;
+color:#38bdf8;
+}
+
+#chatBox{
+height:60vh;
+overflow-y:auto;
+padding:10px;
+}
+
+.user{
+background:#38bdf8;
+padding:15px;
+margin:10px;
+border-radius:20px;
+text-align:right;
+color:black;
+font-size:20px;
+}
+
+.bot{
+background:#1e293b;
+padding:15px;
+margin:10px;
+border-radius:20px;
+font-size:20px;
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+width:100%;
+background:#02122f;
+padding:10px;
+}
+
+input{
+width:70%;
+padding:15px;
+border:none;
+border-radius:15px;
+font-size:20px;
+}
+
+button{
+padding:15px;
+border:none;
+border-radius:15px;
+background:#38bdf8;
+font-size:20px;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Gemini Mobile AI</h1>
+
+<div id="chatBox">
+
+<div class="bot">
+Hello 👋 Ask anything...
+</div>
+
+</div>
+
+<div class="bottom">
+
+<input type="text" id="userInput" placeholder="Ask anything...">
+
+<button onclick="sendMessage()">
+Send
+</button>
+
+<br><br>
+
+<button onclick="startVoice()">
+🎤 Voice
+</button>
+
+<br><br>
+
+<input type="file">
+
+</div>
+
+<script>
+
+async function sendMessage(){
+
+let input=document.getElementById("userInput");
+
+let message=input.value;
+
+if(message=="") return;
+
+let chatBox=document.getElementById("chatBox");
+
+chatBox.innerHTML += `
+<div class="user">${message}</div>
+`;
+
+input.value="";
+
+try{
+
+let response=await fetch("/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+message:message
+})
+});
+
+let data=await response.json();
+
+chatBox.innerHTML += `
+<div class="bot">${data.reply}</div>
+`;
+
+}catch{
+
+chatBox.innerHTML += `
+<div class="bot">Backend error</div>
+`;
+
+}
+
+chatBox.scrollTop=chatBox.scrollHeight;
+
+}
+
+function startVoice(){
+
+let recognition=new webkitSpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.onresult=function(event){
+
+document.getElementById("userInput").value=
+event.results[0][0].transcript;
+
+};
+
+recognition.start();
+
+}
+
+</script>
+
+</body>
+</html>
