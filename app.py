@@ -1,54 +1,50 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
-import os
 
 app = Flask(__name__)
 CORS(app)
 
-# GEMINI API KEY
-API_KEY = "AIzaSyDyC5no-nBZlPpzqNSSmg1axyB7eUHtunE"
+OPENROUTER_API_KEY = "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"
 
 @app.route("/")
 def home():
-    return "Gemini Backend Running"
+    return "OpenRouter Backend Running"
 
 @app.route("/chat", methods=["POST"])
 def chat():
 
     try:
-        data = request.get_json()
 
+        data = request.get_json()
         user_message = data.get("message", "")
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+        response = requests.post(
 
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {
-                            "text": user_message
-                        }
-                    ]
-                }
-            ]
-        }
+            url="https://openrouter.ai/api/v1/chat/completions",
 
-        response = requests.post(url, json=payload)
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json"
+            },
+
+            json={
+                "model": "deepseek/deepseek-chat:free",
+
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ]
+            }
+        )
 
         result = response.json()
 
         print(result)
 
-        # SAFE RESPONSE
-        if "candidates" in result:
-
-            reply = result["candidates"][0]["content"]["parts"][0]["text"]
-
-        else:
-
-            reply = "Gemini API Error"
+        reply = result["choices"][0]["message"]["content"]
 
         return jsonify({
             "reply": reply
